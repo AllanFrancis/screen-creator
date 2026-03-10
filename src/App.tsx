@@ -10,6 +10,7 @@ import WorkoutDayPage from "./pages/WorkoutDayPage";
 import EvolutionPage from "./pages/EvolutionPage";
 import ProfilePage from "./pages/ProfilePage";
 import AICoachPage from "./pages/AICoachPage";
+import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
