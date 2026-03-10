@@ -31,10 +31,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + "/home" },
-    });
+    const isCustomDomain =
+      !window.location.hostname.includes("lovable.app") &&
+      !window.location.hostname.includes("lovableproject.com") &&
+      !window.location.hostname.includes("localhost");
+
+    const redirectTo = `${window.location.origin}/home`;
+
+    if (isCustomDomain) {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo, skipBrowserRedirect: true },
+      });
+      if (error) throw error;
+      if (data?.url) window.location.href = data.url;
+    } else {
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+    }
   };
 
   const signOut = async () => {
