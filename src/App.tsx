@@ -29,6 +29,7 @@ const App = () => (
           <Route path="/evolucao" element={<EvolutionPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/ai" element={<AICoachPage />} />
+          <Route path="/install" element={<InstallPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
