@@ -124,6 +124,14 @@ const WorkoutDayPage = () => {
         </div>
       </div>
 
+      {helpExercise && (
+        <ExerciseHelpDialog
+          open={!!helpExercise}
+          onOpenChange={(open) => !open && setHelpExercise(null)}
+          exerciseName={helpExercise}
+        />
+      )}
+
       <BottomNav />
     </div>
   );
