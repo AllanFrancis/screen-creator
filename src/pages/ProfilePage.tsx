@@ -19,7 +19,7 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="mx-auto max-w-md px-5 pt-6">
-        <h1 className="font-display text-lg font-bold text-destructive">FIT.AI</h1>
+        <h1 className="font-display text-lg font-bold text-primary">FIT.AI</h1>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
