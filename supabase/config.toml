@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.save-training-plan]
 verify_jwt = false
+
+[functions.exercise-help]
+verify_jwt = false

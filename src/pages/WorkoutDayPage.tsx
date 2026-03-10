@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Dumbbell, Calendar, Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -6,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 import ExerciseItem from "@/components/ExerciseItem";
+import ExerciseHelpDialog from "@/components/ExerciseHelpDialog";
 import heroPushup from "@/assets/hero-pushup.jpg";
 import heroSquat from "@/assets/hero-squat.jpg";
 import heroPullup from "@/assets/hero-pullup.jpg";
@@ -33,6 +35,7 @@ const WorkoutDayPage = () => {
   const navigate = useNavigate();
   const { dayId } = useParams();
   const { user } = useAuth();
+  const [helpExercise, setHelpExercise] = useState<string | null>(null);
 
   const { data: workoutDay, isLoading } = useQuery({
     queryKey: ["workout_day", dayId, user?.id],
@@ -114,11 +117,20 @@ const WorkoutDayPage = () => {
                 sets={ex.sets}
                 reps={parseInt(ex.reps) || 12}
                 rest={parseInt(ex.rest) || 60}
+                onHelp={() => setHelpExercise(ex.name)}
               />
             </motion.div>
           ))}
         </div>
       </div>
+
+      {helpExercise && (
+        <ExerciseHelpDialog
+          open={!!helpExercise}
+          onOpenChange={(open) => !open && setHelpExercise(null)}
+          exerciseName={helpExercise}
+        />
+      )}
 
       <BottomNav />
     </div>
