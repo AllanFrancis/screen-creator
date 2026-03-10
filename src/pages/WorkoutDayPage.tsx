@@ -35,6 +35,7 @@ const WorkoutDayPage = () => {
   const navigate = useNavigate();
   const { dayId } = useParams();
   const { user } = useAuth();
+  const [helpExercise, setHelpExercise] = useState<string | null>(null);
 
   const { data: workoutDay, isLoading } = useQuery({
     queryKey: ["workout_day", dayId, user?.id],
