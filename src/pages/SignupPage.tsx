@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Loader2 } from "lucide-react";
 import heroDumbbell from "@/assets/hero-dumbbell.jpg";
 
-const LoginPage = () => {
+const SignupPage = () => {
   const navigate = useNavigate();
-  const { user, loading, signInWithGoogle, signInWithEmail } = useAuth();
+  const { user, loading, signUpWithEmail, signInWithGoogle } = useAuth();
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -17,14 +18,16 @@ const LoginPage = () => {
     if (!loading && user) navigate("/home", { replace: true });
   }, [user, loading, navigate]);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return toast.error("Preencha todos os campos");
+    if (!fullName || !email || !password) return toast.error("Preencha todos os campos");
+    if (password.length < 6) return toast.error("A senha deve ter pelo menos 6 caracteres");
     setSubmitting(true);
     try {
-      await signInWithEmail(email, password);
+      await signUpWithEmail(email, password, fullName);
+      toast.success("Conta criada! Verifique seu email para confirmar.");
     } catch (err: any) {
-      toast.error(err.message === "Invalid login credentials" ? "Email ou senha incorretos" : err.message);
+      toast.error(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -51,10 +54,20 @@ const LoginPage = () => {
         className="gradient-primary rounded-t-3xl px-6 pb-8 pt-10"
       >
         <h2 className="text-center font-display text-2xl font-bold leading-tight text-primary-foreground">
-          Entrar na sua conta
+          Criar sua conta
         </h2>
 
-        <form onSubmit={handleEmailLogin} className="mt-6 space-y-3">
+        <form onSubmit={handleSignup} className="mt-6 space-y-3">
+          <div className="flex items-center gap-3 rounded-xl bg-card px-4 py-3">
+            <User className="h-5 w-5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Nome completo"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            />
+          </div>
           <div className="flex items-center gap-3 rounded-xl bg-card px-4 py-3">
             <Mail className="h-5 w-5 text-muted-foreground" />
             <input
@@ -69,7 +82,7 @@ const LoginPage = () => {
             <Lock className="h-5 w-5 text-muted-foreground" />
             <input
               type="password"
-              placeholder="Senha"
+              placeholder="Senha (mín. 6 caracteres)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
@@ -81,7 +94,7 @@ const LoginPage = () => {
             disabled={submitting}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-foreground py-4 font-display font-semibold text-background shadow-card transition-transform active:scale-[0.98] disabled:opacity-60"
           >
-            {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Entrar"}
+            {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Criar conta"}
           </button>
         </form>
 
@@ -105,9 +118,9 @@ const LoginPage = () => {
         </button>
 
         <p className="mt-5 text-center text-sm text-primary-foreground/80">
-          Não tem conta?{" "}
-          <Link to="/signup" className="font-semibold text-primary-foreground underline underline-offset-2">
-            Criar conta
+          Já tem conta?{" "}
+          <Link to="/" className="font-semibold text-primary-foreground underline underline-offset-2">
+            Fazer login
           </Link>
         </p>
 
@@ -119,4 +132,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;
