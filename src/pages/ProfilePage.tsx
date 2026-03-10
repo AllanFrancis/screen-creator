@@ -47,12 +47,26 @@ const ProfilePage = () => {
           ))}
         </div>
 
+        {/* Dark mode toggle */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+          className="mt-8 flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-card"
+        >
+          <div className="flex items-center gap-3">
+            {theme === "dark" ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-primary" />}
+            <span className="font-medium text-sm">Modo Escuro</span>
+          </div>
+          <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
+        </motion.div>
+
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
           onClick={() => navigate("/")}
-          className="mt-8 flex w-full items-center justify-center gap-2 text-destructive font-medium"
+          className="mt-6 flex w-full items-center justify-center gap-2 text-destructive font-medium"
         >
           Sair da conta <LogOut className="h-4 w-4" />
         </motion.button>
