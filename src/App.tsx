@@ -28,6 +28,7 @@ const App = () => (
           <AuthProvider>
             <Routes>
               <Route path="/" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/plano" element={<TrainingPlanPage />} />
               <Route path="/treino/:dayId" element={<WorkoutDayPage />} />
