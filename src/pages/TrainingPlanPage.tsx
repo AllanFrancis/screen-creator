@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Zap, Calendar, Loader2 } from "lucide-react";
+import { Zap, Calendar, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
@@ -42,39 +43,51 @@ const RestDayCard = ({ dayKey }: { dayKey: string }) => (
 const TrainingPlanPage = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const [expandedPlanId, setExpandedPlanId] = useState<string | null>(null);
 
-  // Fetch active plan
-  const { data: activePlan, isLoading: planLoading } = useQuery({
-    queryKey: ["active_training_plan", user?.id],
+  // Fetch ALL plans for user
+  const { data: plans, isLoading: plansLoading } = useQuery({
+    queryKey: ["all_training_plans", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("training_plans")
         .select("*")
         .eq("user_id", user!.id)
-        .eq("is_active", true)
-        .maybeSingle();
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
 
-  // Fetch workout days for active plan
+  // Fetch workout days + exercises for all plans
+  const planIds = plans?.map((p) => p.id) ?? [];
   const { data: workoutDays, isLoading: daysLoading } = useQuery({
-    queryKey: ["workout_days", activePlan?.id],
+    queryKey: ["all_workout_days", planIds],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("workout_days")
         .select("*, exercises(*)")
-        .eq("plan_id", activePlan!.id)
+        .in("plan_id", planIds)
         .order("sort_order", { ascending: true });
       if (error) throw error;
       return data;
     },
-    enabled: !!activePlan?.id,
+    enabled: planIds.length > 0,
   });
 
-  const isLoading = authLoading || planLoading || daysLoading;
+  const isLoading = authLoading || plansLoading || daysLoading;
+
+  // Auto-expand active plan
+  const activePlan = plans?.find((p) => p.is_active);
+  const currentExpanded = expandedPlanId ?? activePlan?.id ?? null;
+
+  const togglePlan = (id: string) => {
+    setExpandedPlanId((prev) => (prev === id ? "" : id));
+  };
+
+  const getDaysForPlan = (planId: string) =>
+    workoutDays?.filter((d) => d.plan_id === planId) ?? [];
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -91,9 +104,9 @@ const TrainingPlanPage = () => {
             FIT.AI
           </motion.span>
           <span className="mb-1 inline-flex w-fit items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-            💪 {activePlan?.name?.toUpperCase() || "PLANO DE TREINO"}
+            💪 MEUS PLANOS
           </span>
-          <h1 className="font-display text-2xl font-bold text-hero-dark-foreground">Plano de Treino</h1>
+          <h1 className="font-display text-2xl font-bold text-hero-dark-foreground">Planos de Treino</h1>
         </div>
       </div>
 
@@ -104,9 +117,9 @@ const TrainingPlanPage = () => {
           </div>
         )}
 
-        {!isLoading && !activePlan && (
+        {!isLoading && (!plans || plans.length === 0) && (
           <div className="rounded-2xl border border-border bg-card p-8 text-center">
-            <p className="text-muted-foreground">Nenhum plano ativo encontrado.</p>
+            <p className="text-muted-foreground">Nenhum plano encontrado.</p>
             <button
               onClick={() => navigate("/ai")}
               className="mt-4 rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground"
@@ -117,28 +130,73 @@ const TrainingPlanPage = () => {
         )}
 
         {!isLoading &&
-          workoutDays?.map((day, i) => {
-            const exerciseCount = (day as any).exercises?.length ?? 0;
-            const image = dayImages[day.day_key] || heroDumbbell;
+          plans?.map((plan) => {
+            const days = getDaysForPlan(plan.id);
+            const isExpanded = currentExpanded === plan.id;
 
             return (
               <motion.div
-                key={day.id}
+                key={plan.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.05 }}
+                className="overflow-hidden rounded-2xl border border-border bg-card shadow-card"
               >
-                {isRestDay(day.title) ? (
-                  <RestDayCard dayKey={day.day_key} />
-                ) : (
-                  <WorkoutCard
-                    day={day.day_key.toUpperCase()}
-                    title={day.title}
-                    duration="45min"
-                    exercises={exerciseCount}
-                    image={image}
-                    onClick={() => navigate(`/treino/${day.day_key}`)}
-                  />
+                {/* Plan header */}
+                <button
+                  onClick={() => togglePlan(plan.id)}
+                  className="flex w-full items-center justify-between p-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <Zap className="h-5 w-5 text-primary" />
+                    <div className="text-left">
+                      <h2 className="font-display text-lg font-bold text-foreground">{plan.name}</h2>
+                      <p className="text-xs text-muted-foreground">
+                        {days.length} dias · {plan.is_active ? "✅ Ativo" : "Inativo"}
+                      </p>
+                    </div>
+                  </div>
+                  {isExpanded ? (
+                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </button>
+
+                {/* Expanded days */}
+                {isExpanded && (
+                  <div className="space-y-3 px-4 pb-4">
+                    {days.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-2">
+                        Nenhum dia de treino cadastrado.
+                      </p>
+                    )}
+                    {days.map((day, i) => {
+                      const exerciseCount = (day as any).exercises?.length ?? 0;
+                      const image = dayImages[day.day_key] || heroDumbbell;
+
+                      return (
+                        <motion.div
+                          key={day.id}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.03 }}
+                        >
+                          {isRestDay(day.title) ? (
+                            <RestDayCard dayKey={day.day_key} />
+                          ) : (
+                            <WorkoutCard
+                              day={day.day_key.toUpperCase()}
+                              title={day.title}
+                              duration="45min"
+                              exercises={exerciseCount}
+                              image={image}
+                              onClick={() => navigate(`/treino/${day.day_key}`)}
+                            />
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
                 )}
               </motion.div>
             );
