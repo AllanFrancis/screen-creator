@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuthProvider } from "@/hooks/useAuth";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import TrainingPlanPage from "./pages/TrainingPlanPage";
@@ -23,17 +24,19 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/plano" element={<TrainingPlanPage />} />
-            <Route path="/treino/:dayId" element={<WorkoutDayPage />} />
-            <Route path="/evolucao" element={<EvolutionPage />} />
-            <Route path="/perfil" element={<ProfilePage />} />
-            <Route path="/ai" element={<AICoachPage />} />
-            <Route path="/install" element={<InstallPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<LoginPage />} />
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/plano" element={<TrainingPlanPage />} />
+              <Route path="/treino/:dayId" element={<WorkoutDayPage />} />
+              <Route path="/evolucao" element={<EvolutionPage />} />
+              <Route path="/perfil" element={<ProfilePage />} />
+              <Route path="/ai" element={<AICoachPage />} />
+              <Route path="/install" element={<InstallPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

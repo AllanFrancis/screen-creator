@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 import WorkoutCard from "@/components/WorkoutCard";
 import heroPushup from "@/assets/hero-pushup.jpg";
@@ -11,6 +12,8 @@ const trainedDays = [true, true, false, false, false, false, false];
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || user?.user_metadata?.name?.split(" ")[0] || "Usuário";
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -33,7 +36,7 @@ const HomePage = () => {
             className="flex items-end justify-between"
           >
             <div>
-              <h1 className="font-display text-2xl font-bold text-hero-dark-foreground">Olá, Paulo</h1>
+              <h1 className="font-display text-2xl font-bold text-hero-dark-foreground">Olá, {firstName}</h1>
               <p className="text-sm text-hero-dark-foreground/70">Bora treinar hoje?</p>
             </div>
             <button
