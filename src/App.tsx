@@ -10,6 +10,7 @@ import WorkoutDayPage from "./pages/WorkoutDayPage";
 import EvolutionPage from "./pages/EvolutionPage";
 import ProfilePage from "./pages/ProfilePage";
 import AICoachPage from "./pages/AICoachPage";
+import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/evolucao" element={<EvolutionPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/ai" element={<AICoachPage />} />
+          <Route path="/install" element={<InstallPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
