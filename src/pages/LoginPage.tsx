@@ -1,9 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 import heroDumbbell from "@/assets/hero-dumbbell.jpg";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { user, loading, signInWithGoogle } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user) navigate("/home", { replace: true });
+  }, [user, loading, navigate]);
 
   return (
     <div className="flex min-h-screen flex-col bg-hero-dark">
@@ -30,7 +37,7 @@ const LoginPage = () => {
         </h2>
 
         <button
-          onClick={() => navigate("/home")}
+          onClick={signInWithGoogle}
           className="mt-8 flex w-full items-center justify-center gap-3 rounded-xl bg-card py-4 font-display font-semibold text-foreground shadow-card transition-transform active:scale-[0.98]"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">

@@ -1,20 +1,52 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Weight, Ruler, Percent, User, LogOut, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/components/ThemeProvider";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
 import BottomNav from "@/components/BottomNav";
 
-const stats = [
-  { icon: Weight, value: "78.5", unit: "KG", color: "text-primary" },
-  { icon: Ruler, value: "178", unit: "CM", color: "text-primary" },
-  { icon: Percent, value: "12-15%", unit: "GC", color: "text-primary" },
-  { icon: User, value: "26", unit: "ANOS", color: "text-primary" },
-];
+interface Profile {
+  full_name: string | null;
+  avatar_url: string | null;
+  weight: number | null;
+  height: number | null;
+  goal: string | null;
+}
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("full_name, avatar_url, weight, height, goal")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) setProfile(data);
+      });
+  }, [user]);
+
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || "Usuário";
+
+  const stats = [
+    { icon: Weight, value: profile?.weight?.toString() || "--", unit: "KG", color: "text-primary" },
+    { icon: Ruler, value: profile?.height?.toString() || "--", unit: "CM", color: "text-primary" },
+    { icon: Percent, value: "--", unit: "GC", color: "text-primary" },
+    { icon: User, value: "--", unit: "ANOS", color: "text-primary" },
+  ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -22,12 +54,16 @@ const ProfilePage = () => {
         <h1 className="font-display text-lg font-bold text-primary">FIT.AI</h1>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-            <User className="h-7 w-7 text-muted-foreground" />
-          </div>
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+              <User className="h-7 w-7 text-muted-foreground" />
+            </div>
+          )}
           <div>
-            <h2 className="font-display text-lg font-bold">Paulo da Silva</h2>
-            <p className="text-sm text-muted-foreground">Plano Básico</p>
+            <h2 className="font-display text-lg font-bold">{displayName}</h2>
+            <p className="text-sm text-muted-foreground">{profile?.goal || "Plano Básico"}</p>
           </div>
         </motion.div>
 
@@ -47,7 +83,6 @@ const ProfilePage = () => {
           ))}
         </div>
 
-        {/* Dark mode toggle */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -65,7 +100,7 @@ const ProfilePage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          onClick={() => navigate("/")}
+          onClick={handleSignOut}
           className="mt-6 flex w-full items-center justify-center gap-2 text-destructive font-medium"
         >
           Sair da conta <LogOut className="h-4 w-4" />
