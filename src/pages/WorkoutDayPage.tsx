@@ -117,6 +117,7 @@ const WorkoutDayPage = () => {
                 sets={ex.sets}
                 reps={parseInt(ex.reps) || 12}
                 rest={parseInt(ex.rest) || 60}
+                onHelp={() => setHelpExercise(ex.name)}
               />
             </motion.div>
           ))}
