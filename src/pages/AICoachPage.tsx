@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUp, Sparkles, X, Loader2 } from "lucide-react";
+import { ArrowUp, Sparkles, X, Loader2, Save, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import BottomNav from "@/components/BottomNav";
 import heroDumbbell from "@/assets/hero-dumbbell.jpg";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Message {
   role: "user" | "assistant";
@@ -13,6 +15,7 @@ interface Message {
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach`;
+const SAVE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/save-training-plan`;
 
 const quickActions = ["Criar plano de treino", "Mudar objetivo", "Dicas de nutrição"];
 
@@ -77,7 +80,6 @@ async function streamChat({
     }
   }
 
-  // Final flush
   if (textBuffer.trim()) {
     for (let raw of textBuffer.split("\n")) {
       if (!raw) continue;
@@ -97,18 +99,41 @@ async function streamChat({
   onDone();
 }
 
+// Heuristic: plan is likely generated if assistant message has exercise-like content
+function looksLikePlan(content: string): boolean {
+  const indicators = ["séries", "series", "repetições", "reps", "descanso", "Dia A", "Dia B", "Dia C", "Supino", "Agachamento", "exercício"];
+  let matches = 0;
+  for (const ind of indicators) {
+    if (content.toLowerCase().includes(ind.toLowerCase())) matches++;
+  }
+  return matches >= 3;
+}
+
 const AICoachPage = () => {
   const navigate = useNavigate();
+  const { session } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Olá! 💪 Sou seu Coach AI personal trainer. Vou te ajudar a criar um plano de treino personalizado!\n\nPara começar, qual é o seu **objetivo principal**? (ex: hipertrofia, emagrecimento, condicionamento físico)" },
   ]);
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [planSaved, setPlanSaved] = useState(false);
+  const [showSaveButton, setShowSaveButton] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
+
+  // Check if a plan was generated after each new assistant message
+  useEffect(() => {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.role === "assistant" && looksLikePlan(lastMsg.content)) {
+      setShowSaveButton(true);
+      setPlanSaved(false);
+    }
   }, [messages]);
 
   const handleSend = async (text?: string) => {
@@ -120,6 +145,7 @@ const AICoachPage = () => {
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
+    setShowSaveButton(false);
 
     let assistantSoFar = "";
     const upsertAssistant = (chunk: string) => {
@@ -143,6 +169,50 @@ const AICoachPage = () => {
       console.error(e);
       setIsLoading(false);
       toast.error(e instanceof Error ? e.message : "Erro ao conectar com a IA");
+    }
+  };
+
+  const handleSavePlan = async () => {
+    if (!session?.access_token) {
+      toast.error("Faça login para salvar o plano de treino");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const resp = await fetch(SAVE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ messages }),
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        throw new Error(data.error || "Erro ao salvar plano");
+      }
+
+      setPlanSaved(true);
+      setShowSaveButton(false);
+      toast.success(`Plano "${data.plan_name}" salvo com sucesso! 🎉`);
+      
+      // Add confirmation message
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `✅ Seu plano **"${data.plan_name}"** foi salvo com sucesso! Você pode acessá-lo na aba **Plano de Treino**. Bons treinos! 💪`,
+        },
+      ]);
+    } catch (e) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : "Erro ao salvar plano");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -219,6 +289,43 @@ const AICoachPage = () => {
                 </motion.div>
               )}
             </div>
+
+            {/* Save plan button */}
+            {showSaveButton && !planSaved && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="px-4 py-2"
+              >
+                <button
+                  onClick={handleSavePlan}
+                  disabled={isSaving}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary py-3 font-semibold text-primary-foreground transition-transform active:scale-[0.98] disabled:opacity-70"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Salvando plano...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" /> Salvar plano de treino
+                    </>
+                  )}
+                </button>
+              </motion.div>
+            )}
+
+            {planSaved && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="px-4 py-2"
+              >
+                <div className="flex items-center justify-center gap-2 rounded-xl bg-muted py-3 text-sm font-medium text-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" /> Plano salvo com sucesso
+                </div>
+              </motion.div>
+            )}
 
             {/* Quick actions */}
             <div className="flex gap-2 overflow-x-auto px-4 py-2">

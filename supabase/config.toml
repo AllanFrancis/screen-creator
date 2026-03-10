@@ -2,3 +2,6 @@ project_id = "xgsvtagifiwzetuzdwat"
 
 [functions.ai-coach]
 verify_jwt = false
+
+[functions.save-training-plan]
+verify_jwt = false
