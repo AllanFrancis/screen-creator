@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
-import { Weight, Ruler, Percent, User, LogOut } from "lucide-react";
+import { Weight, Ruler, Percent, User, LogOut, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@/components/ThemeProvider";
+import { Switch } from "@/components/ui/switch";
 import BottomNav from "@/components/BottomNav";
 
 const stats = [
