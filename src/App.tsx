@@ -12,7 +12,6 @@ import WorkoutDayPage from "./pages/WorkoutDayPage";
 import EvolutionPage from "./pages/EvolutionPage";
 import ProfilePage from "./pages/ProfilePage";
 import AICoachPage from "./pages/AICoachPage";
-import SetupPage from "./pages/SetupPage";
 import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 
@@ -28,7 +27,6 @@ const App = () => (
           <AuthProvider>
             <Routes>
               <Route path="/" element={<LoginPage />} />
-              <Route path="/setup" element={<SetupPage />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/plano" element={<TrainingPlanPage />} />
               <Route path="/treino/:dayId" element={<WorkoutDayPage />} />
