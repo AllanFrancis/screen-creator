@@ -57,7 +57,7 @@ const AICoachPage = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 30 }}
-          className="mx-4 -mt-8 flex flex-col rounded-2xl border border-border bg-card shadow-card z-40 "
+          className="mx-4 -mt-8 relative flex flex-col rounded-2xl border border-border bg-card shadow-card z-40"
           style={{ height: "calc(100vh - 200px)" }}>
           
             {/* Chat header */}
