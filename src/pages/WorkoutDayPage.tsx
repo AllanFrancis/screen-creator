@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 import ExerciseItem from "@/components/ExerciseItem";
+import ExerciseHelpDialog from "@/components/ExerciseHelpDialog";
 import heroPushup from "@/assets/hero-pushup.jpg";
 import heroSquat from "@/assets/hero-squat.jpg";
 import heroPullup from "@/assets/hero-pullup.jpg";
