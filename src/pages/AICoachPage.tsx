@@ -15,8 +15,8 @@ const quickActions = ["Alterar plano de treino", "Mudar objetivo", "Atualizar da
 const AICoachPage = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "Olá! Sou sua IA personal. Como posso ajudar com seu treino hoje?" },
-  ]);
+  { role: "assistant", content: "Olá! Sou sua IA personal. Como posso ajudar com seu treino hoje?" }]
+  );
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -33,9 +33,9 @@ const AICoachPage = () => {
     // Mock AI response
     setTimeout(() => {
       setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Entendi! Vou te ajudar com isso. Posso adaptar seu plano de treino conforme sua necessidade. O que você gostaria de mudar?" },
-      ]);
+      ...prev,
+      { role: "assistant", content: "Entendi! Vou te ajudar com isso. Posso adaptar seu plano de treino conforme sua necessidade. O que você gostaria de mudar?" }]
+      );
     }, 1000);
   };
 
@@ -52,14 +52,14 @@ const AICoachPage = () => {
 
       {/* Chat panel */}
       <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            className="mx-4 -mt-8 flex flex-col rounded-2xl border border-border bg-card shadow-card"
-            style={{ height: "calc(100vh - 200px)" }}
-          >
+        {isOpen &&
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 30 }}
+          className="mx-4 -mt-8 flex flex-col rounded-2xl border border-border bg-card shadow-card z-40 "
+          style={{ height: "calc(100vh - 200px)" }}>
+          
             {/* Chat header */}
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div className="flex items-center gap-3">
@@ -80,72 +80,72 @@ const AICoachPage = () => {
 
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.map((msg, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
+              {messages.map((msg, i) =>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
-                      msg.role === "user"
-                        ? "bg-primary text-primary-foreground rounded-br-md"
-                        : "bg-muted text-foreground rounded-bl-md"
-                    }`}
-                  >
+                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
+                msg.role === "user" ?
+                "bg-primary text-primary-foreground rounded-br-md" :
+                "bg-muted text-foreground rounded-bl-md"}`
+                }>
+                
                     {msg.content}
                   </div>
                 </motion.div>
-              ))}
+            )}
             </div>
 
             {/* Quick actions */}
             <div className="flex gap-2 overflow-x-auto px-4 py-2">
-              {quickActions.map((action) => (
-                <button
-                  key={action}
-                  onClick={() => {
-                    setInput(action);
-                  }}
-                  className="whitespace-nowrap rounded-full border border-border bg-card px-4 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-                >
+              {quickActions.map((action) =>
+            <button
+              key={action}
+              onClick={() => {
+                setInput(action);
+              }}
+              className="whitespace-nowrap rounded-full border border-border bg-card px-4 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted">
+              
                   {action}
                 </button>
-              ))}
+            )}
             </div>
 
             {/* Input */}
             <div className="flex items-center gap-2 border-t border-border px-4 py-3">
               <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Digite sua mensagem"
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Digite sua mensagem"
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+            
               <button
-                onClick={handleSend}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95"
-              >
+              onClick={handleSend}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95">
+              
                 <ArrowUp className="h-4 w-4" />
               </button>
             </div>
           </motion.div>
-        )}
+        }
       </AnimatePresence>
 
-      {!isOpen && (
-        <div className="flex items-center justify-center mt-20">
+      {!isOpen &&
+      <div className="flex items-center justify-center mt-20">
           <button onClick={() => setIsOpen(true)} className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg">
             <Sparkles className="h-5 w-5" /> Abrir Coach AI
           </button>
         </div>
-      )}
+      }
 
       <BottomNav />
-    </div>
-  );
+    </div>);
+
 };
 
 export default AICoachPage;
