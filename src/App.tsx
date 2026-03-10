@@ -15,6 +15,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AICoachPage from "./pages/AICoachPage";
 import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -29,12 +30,12 @@ const App = () => (
             <Routes>
               <Route path="/" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
-              <Route path="/home" element={<HomePage />} />
-              <Route path="/plano" element={<TrainingPlanPage />} />
-              <Route path="/treino/:dayId" element={<WorkoutDayPage />} />
-              <Route path="/evolucao" element={<EvolutionPage />} />
-              <Route path="/perfil" element={<ProfilePage />} />
-              <Route path="/ai" element={<AICoachPage />} />
+              <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+              <Route path="/plano" element={<ProtectedRoute><TrainingPlanPage /></ProtectedRoute>} />
+              <Route path="/treino/:dayId" element={<ProtectedRoute><WorkoutDayPage /></ProtectedRoute>} />
+              <Route path="/evolucao" element={<ProtectedRoute><EvolutionPage /></ProtectedRoute>} />
+              <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/ai" element={<ProtectedRoute><AICoachPage /></ProtectedRoute>} />
               <Route path="/install" element={<InstallPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
