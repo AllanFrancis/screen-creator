@@ -200,14 +200,8 @@ const AICoachPage = () => {
       setShowSaveButton(false);
       toast.success(`Plano "${data.plan_name}" salvo com sucesso! 🎉`);
       
-      // Add confirmation message
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: `✅ Seu plano **"${data.plan_name}"** foi salvo com sucesso! Você pode acessá-lo na aba **Plano de Treino**. Bons treinos! 💪`,
-        },
-      ]);
+      // Redirect to training plan page after a brief delay
+      setTimeout(() => navigate("/plano"), 1200);
     } catch (e) {
       console.error(e);
       toast.error(e instanceof Error ? e.message : "Erro ao salvar plano");
